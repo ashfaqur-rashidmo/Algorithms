@@ -2,7 +2,8 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-class Solution {
+class Solution {                  Time Complexity O(v^2)
+                                  Space Complexity O(v)
 public:
     vector<int> dijkstra(int v, vector<vector<int>> adj[], int src, vector<int>& prev) {
         vector<int> explore(v, 0); // Keeps track of explored nodes
