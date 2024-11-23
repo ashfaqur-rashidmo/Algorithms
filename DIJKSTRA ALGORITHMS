@@ -1,0 +1,130 @@
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    vector<int> dijkstra(int v, vector<vector<int>> adj[], int src, vector<int>& prev) {
+        vector<int> explore(v, 0); // Keeps track of explored nodes
+        vector<int> dist(v, INT_MAX); // Stores the shortest distances
+        dist[src] = 0;
+        prev[src] = -1; // Source has no predecessor
+
+        for (int count = 0; count < v; ++count) {
+            int node = -1;
+            int value = INT_MAX;
+
+            // Find the unvisited node with the smallest distance
+            for (int i = 0; i < v; ++i) {
+                if (!explore[i] && dist[i] < value) {
+                    node = i;
+                    value = dist[i];
+                }
+            }
+
+            if (node == -1) break; // No reachable nodes remain
+
+            explore[node] = 1;
+
+            // Update distances to neighbors
+            for (const auto& neighbor : adj[node]) {
+                int nextNode = neighbor[0];
+                int weight = neighbor[1];
+                if (!explore[nextNode] && dist[node] + weight < dist[nextNode]) {
+                    dist[nextNode] = dist[node] + weight;
+                    prev[nextNode] = node; // Update predecessor
+                }
+            }
+        }
+
+        return dist;
+    }
+
+    void printPath(int dest, const vector<int>& prev, const map<int, string>& indexToVertex) {
+        if (prev[dest] == -1) {
+            cout << indexToVertex.at(dest);
+            return;
+        }
+        printPath(prev[dest], prev, indexToVertex);
+        cout << "->" << indexToVertex.at(dest);
+    }
+};
+
+int main() {
+    cout << "Enter the number of vertices: ";
+    int v;
+    cin >> v;
+
+    cout << "Enter the number of edges: ";
+    int e;
+    cin >> e;
+
+    // Create mappings for string-to-int and int-to-string
+    map<string, int> vertexToIndex;
+    map<int, string> indexToVertex;
+
+    vector<vector<int>> adj[v];
+    cout << "Enter vertices (unique strings):\n";
+    for (int i = 0; i < v; ++i) {
+        string vertex;
+        cin >> vertex;
+        vertexToIndex[vertex] = i;
+        indexToVertex[i] = vertex;
+    }
+
+    cout << "Enter edges in the format (u v w):\n";
+    for (int i = 0; i < e; ++i) {
+        string u, v;
+        int w;
+        cin >> u >> v >> w;
+
+        int uIdx = vertexToIndex[u];
+        int vIdx = vertexToIndex[v];
+
+        // Directed graph: add edge u -> v with weight w
+        adj[uIdx].push_back({vIdx, w});
+
+        // If the graph is undirected, uncomment the next line:
+        // adj[vIdx].push_back({uIdx, w});
+    }
+
+    cout << "Enter the source vertex: ";
+    string srcVertex;
+    cin >> srcVertex;
+    int src = vertexToIndex[srcVertex];
+
+    Solution solution;
+    vector<int> prev(v, -1); // To store the predecessors for path reconstruction
+    vector<int> distances = solution.dijkstra(v, adj, src, prev);
+
+    cout << "Enter the destination vertex: ";
+    string destVertex;
+    cin >> destVertex;
+    int dest = vertexToIndex[destVertex];
+
+    // Print the shortest path from source to destination
+    cout << "Shortest path from " << srcVertex << " to " << destVertex << ":\n";
+    solution.printPath(dest, prev, indexToVertex);
+    cout << "\n";
+
+    // Print the distances along the path
+    cout << "Path distances: ";
+    int curr = dest;
+    stack<int> pathStack;
+    while (curr != -1) {
+        pathStack.push(distances[curr]);
+        curr = prev[curr];
+    }
+    while (!pathStack.empty()) {
+        cout << pathStack.top();
+        pathStack.pop();
+        if (!pathStack.empty()) cout << "->";
+    }
+    cout << "\n";
+
+    // Print the total shortest path distance
+    cout << "Total shortest path distance: " << distances[dest] << "\n";
+
+    return 0;
+}
+
